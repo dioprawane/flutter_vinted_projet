@@ -17,5 +17,6 @@ samples, guidance on mobile development, and a full API reference.
 
 ### Connexion
 dioprawane16@gmail.com
+
 Vinted2024
 # flutter_vinted_projet
