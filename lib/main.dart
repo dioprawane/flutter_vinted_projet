@@ -38,6 +38,11 @@ class MyApp extends StatelessWidget {
         ),
       ),
       home: const LoginPage(),
+      routes: {
+        '/profile': (context) => const UserProfilePage(), // Ajoute cette ligne pour la navigation
+        '/buy': (context) => const ClothingListPage(),
+        //'/cart': (context) => const CartPage(), // Remplacer par la page Panier si tu l'as
+      },
     );
   }
 }
@@ -248,7 +253,31 @@ class _ClothingListPageState extends State<ClothingListPage> {
             )
           : _pages[_selectedIndex], // Autres pages (Panier, Profil)
       bottomNavigationBar: BottomNavigationBar(
-        items: const <BottomNavigationBarItem>[
+        currentIndex: _selectedIndex, // L'index actuel de la navigation
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/buy'); // Aller à la page "Acheter"
+          } else if (index == 1) {
+            Navigator.pushNamed(context, '/cart'); // Aller à la page "Panier"
+          } else if (index == 2) {
+            Navigator.pushNamed(context, '/profile'); // Aller à la page "Profil"
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_bag),
+            label: 'Acheter',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.shopping_cart),
+            label: 'Panier',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profil',
+          ),
+        ],
+        /*items: const <BottomNavigationBarItem>[
           BottomNavigationBarItem(
             icon: Icon(Icons.shopping_bag),
             label: 'Acheter',
@@ -265,7 +294,7 @@ class _ClothingListPageState extends State<ClothingListPage> {
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blueAccent,
         unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,
+        onTap: _onItemTapped,*/
       ),
     );
   }
@@ -281,6 +310,22 @@ class ClothingDetailPage extends StatelessWidget {
   final QueryDocumentSnapshot clothingItem;
 
   const ClothingDetailPage({super.key, required this.clothingItem});
+
+  // Fonction pour ajouter l'article au panier
+  Future<void> _addToCart(BuildContext context) async {
+    // Exemple d'ajout dans Firestore dans la collection "panier" pour l'utilisateur 'user1'
+    await FirebaseFirestore.instance.collection('panier').add({
+      'userId': 'user1', // Remplacer par l'ID utilisateur actuel
+      'itemId': clothingItem.id,
+      'titre': clothingItem['details']['titre'],
+      'taille': clothingItem['details']['taille'],
+      'prix': clothingItem['details']['prix'],
+      'image': clothingItem['details']['image'],
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Vêtement ajouté au panier')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -318,13 +363,6 @@ class ClothingDetailPage extends StatelessWidget {
       );
     }
 
-    /*String imageBase64 = clothingItem['image']; // Récupérer l'image en base64
-
-    // Supprimer le préfixe si nécessaire
-    if (imageBase64.startsWith('data:image')) {
-      imageBase64 = imageBase64.split(',')[1]; // Garder seulement la partie Base64
-    }*/
-
     return Scaffold(
       appBar: AppBar(
         title: Text(clothingItem['titre']),
@@ -338,8 +376,8 @@ class ClothingDetailPage extends StatelessWidget {
               Center(
                 child: Image.memory(
                   base64Decode(imageBase64), // Décoder et afficher l'image
-                  width: 350,
-                  height: 350,
+                  width: 300,
+                  height: 300,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -353,8 +391,219 @@ class ClothingDetailPage extends StatelessWidget {
             Text('Catégorie : ${details['categorie']}', style: const TextStyle(fontSize: 18)),
             const SizedBox(height: 10),
             Text('Marque : ${details['marque']}', style: const TextStyle(fontSize: 18)),
+
+            const SizedBox(height: 30),
+
+            // Alignement des boutons "Retour" et "Ajouter au panier"
+            /*Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espacement entre les deux boutons
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context); // Retour à la page précédente
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey, // Couleur du bouton "Retour"
+                  ),
+                  icon: const Icon(Icons.arrow_back), // Icône pour le bouton "Retour"
+                  label: const Text('Retour'), // Texte du bouton "Retour"
+                  //child: const Text('Retour'),
+                ),
+                ElevatedButton(
+                  onPressed: () => _addToCart(context), // Appelle la fonction pour ajouter au panier
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.blue, // Couleur du bouton "Ajouter au panier"
+                  ),
+                  child: const Text('Ajouter au panier'),
+                ),
+              ],
+            ),*/
+            // Alignement des boutons "Retour" et "Ajouter au panier"
+            Row(
+              mainAxisAlignment: MainAxisAlignment
+                  .spaceBetween, // Espacement entre les deux boutons
+              children: [
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context); // Retour à la page précédente
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey, // Couleur du bouton "Retour"
+                  ),
+                  icon: const Icon(
+                      Icons.arrow_back), // Icône pour le bouton "Retour"
+                  label: const Text('Retour'), // Texte du bouton "Retour"
+                ),
+                ElevatedButton.icon(
+                  onPressed: () => _addToCart(
+                      context), // Appelle la fonction pour ajouter au panier
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        Colors.blue, // Couleur du bouton "Ajouter au panier"
+                  ),
+                  icon: const Icon(Icons
+                      .shopping_cart), // Icône pour le bouton "Ajouter au panier"
+                  label: const Text(
+                      'Ajouter au panier'), // Texte du bouton "Ajouter au panier"
+                ),
+              ],
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+// Page du profil utilisateur
+class UserProfilePage extends StatefulWidget {
+  const UserProfilePage({super.key});
+
+  @override
+  _UserProfilePageState createState() => _UserProfilePageState();
+}
+
+class _UserProfilePageState extends State<UserProfilePage> {
+  final _firestore = FirebaseFirestore.instance;
+
+  // Controllers pour les champs de saisie
+  final TextEditingController _loginController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _postalCodeController = TextEditingController();
+  final TextEditingController _cityController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserData(); // Charger les données utilisateur lors de l'initialisation
+  }
+
+  // Fonction pour récupérer les informations utilisateur depuis Firestore
+  Future<void> _fetchUserData() async {
+    var userDoc = await _firestore.collection('users').doc('user1').get(); // Remplacer 'user1' par l'ID utilisateur connecté
+    if (userDoc.exists) {
+      var userData = userDoc.data()!;
+      _loginController.text = userData['login'] ?? '';
+      _passwordController.text = userData['password'] ?? '';
+      _birthdayController.text = userData['anniversaire'] ?? '';
+      _addressController.text = userData['adresse'] ?? '';
+      _postalCodeController.text = userData['code_postal'] ?? '';
+      _cityController.text = userData['ville'] ?? '';
+    }
+  }
+
+  // Fonction pour sauvegarder les informations modifiées
+  Future<void> _saveUserData() async {
+    await _firestore.collection('users').doc('user1').update({
+      'password': _passwordController.text,
+      'anniversaire': _birthdayController.text,
+      'adresse': _addressController.text,
+      'code_postal': _postalCodeController.text,
+      'ville': _cityController.text,
+    });
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Profil mis à jour avec succès')),
+    );
+  }
+
+  // Fonction pour la déconnexion
+  void _logout() {
+    Navigator.of(context).pushReplacementNamed('/login');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Mon profil'),
+        actions: [
+          IconButton(
+            onPressed: _saveUserData,
+            icon: const Icon(Icons.check),
+            tooltip: 'Valider',
+          ),
+        ],
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Champ Login (readonly)
+            TextField(
+              controller: _loginController,
+              decoration: const InputDecoration(labelText: 'Login'),
+              readOnly: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Champ Password (offusqué)
+            TextField(
+              controller: _passwordController,
+              decoration: const InputDecoration(labelText: 'Password'),
+              obscureText: true,
+            ),
+            const SizedBox(height: 10),
+
+            // Champ Anniversaire
+            TextField(
+              controller: _birthdayController,
+              decoration: const InputDecoration(labelText: 'Anniversaire'),
+            ),
+            const SizedBox(height: 10),
+
+            // Champ Adresse
+            TextField(
+              controller: _addressController,
+              decoration: const InputDecoration(labelText: 'Adresse'),
+            ),
+            const SizedBox(height: 10),
+
+            // Champ Code Postal (clavier numérique)
+            TextField(
+              controller: _postalCodeController,
+              decoration: const InputDecoration(labelText: 'Code Postal'),
+              keyboardType: TextInputType.number,
+            ),
+            const SizedBox(height: 10),
+
+            // Champ Ville
+            TextField(
+              controller: _cityController,
+              decoration: const InputDecoration(labelText: 'Ville'),
+            ),
+            const SizedBox(height: 20),
+
+            // Bouton Se déconnecter
+            Center(
+              child: ElevatedButton(
+                onPressed: _logout,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                // Bouton rouge et texte blanc
+                child: const Text('Se déconnecter'),
+              ),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: 2, // Index pour la page "Profil"
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushNamed(context, '/buy'); // Page Acheter
+          } else if (index == 1) {
+            Navigator.pushNamed(context, '/cart'); // Page Panier
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Acheter'),
+          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Panier'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
+        ],
       ),
     );
   }
