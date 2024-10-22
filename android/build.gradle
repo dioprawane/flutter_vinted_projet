@@ -16,3 +16,13 @@ subprojects {
 tasks.register("clean", Delete) {
     delete rootProject.buildDir
 }
+
+buildscript {
+    repositories {
+        google() // Assure-toi que le dépôt Google est bien configuré ici.
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.google.gms:google-services:4.3.15' // Assure-toi d'avoir la dernière version.
+    }
+}

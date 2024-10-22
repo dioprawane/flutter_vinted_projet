@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'firebase_options.dart';
-import 'dart:convert'; // Pour base64Decode
+// Pour base64Decode
+import 'views/pages/profile_page.dart'; // Importer la vue UserView
+import 'views/pages/login_page.dart'; // Importer la vue LoginPage
+import 'views/pages/panier_page.dart'; // Importer la vue LoginPage
+import 'views/pages/clothing_list_page.dart'; // Importer la page de liste des vêtements
+// Importer la page de détail des vêtements
+
 
 // Fonction principale pour démarrer l'application
 void main() async {
@@ -39,105 +44,16 @@ class MyApp extends StatelessWidget {
       ),
       home: const LoginPage(),
       routes: {
-        '/profile': (context) => const UserProfilePage(), // Ajoute cette ligne pour la navigation
+        //'/profile': (context) => const UserProfilePage(), // Ajoute cette ligne pour la navigation
+        '/login': (context) => LoginPage(),
+        '/profile': (context) => ProfileView(userId: 'user1'),
         '/buy': (context) => const ClothingListPage(),
+        '/cart': (context) => PanierPage(userId: 'user1'),
+        //'/details': (context) => const ClothingDetailPage(clothingItem: null), // Usage en naviguant via ClothingItem
+        //'/buy': (context) => const ClothingListPage(),
+        //'/buy': (context) => const ClothingListPage(),
         //'/cart': (context) => const CartPage(), // Remplacer par la page Panier si tu l'as
       },
-    );
-  }
-}
-
-// Page de connexion
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
-
-  @override
-  _LoginPageState createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  final TextEditingController _loginController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-
-  // Fonction de connexion en vérifiant Firestore
-  Future<void> _login() async {
-    String login = _loginController.text.trim();
-    String password = _passwordController.text.trim();
-
-    if (login.isEmpty || password.isEmpty) {
-      // Critère #6 : Si les champs sont vides
-      print('Veuillez remplir les champs');
-      return;
-    }
-
-    try {
-      // Requête dans Firestore pour vérifier si l'utilisateur existe
-      QuerySnapshot query = await FirebaseFirestore.instance
-          .collection('users')
-          .where('login', isEqualTo: login)
-          .where('password', isEqualTo: password)
-          .get();
-
-      if (query.docs.isNotEmpty) {
-        // Critère #5 : Si l'utilisateur existe, rediriger vers la page suivante
-        print('Utilisateur trouvé');
-        Navigator.push(
-          context,
-          //MaterialPageRoute(builder: (context) => HomePage()),
-          MaterialPageRoute(builder: (context) => const ClothingListPage()),
-        );
-      } else {
-        // Si l'utilisateur n'existe pas
-        print('Utilisateur non trouvé ou mot de passe incorrect');
-      }
-    } catch (e) {
-      print('Erreur lors de la connexion : $e');
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Center(
-          child: Text(
-            'DIOP VINTED',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                ),
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        elevation: 10,
-        shadowColor: Colors.black.withOpacity(0.5),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            TextField(
-              controller: _loginController,
-              decoration: const InputDecoration(
-                labelText: 'Login',
-              ),
-            ),
-            const SizedBox(height: 16.0),
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(
-                labelText: 'Password',
-              ),
-              obscureText: true,
-            ),
-            const SizedBox(height: 32.0),
-            ElevatedButton(
-              onPressed: _login, // Appelle la fonction de login
-              child: const Text('Se connecter'),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }
@@ -158,7 +74,7 @@ class HomePage extends StatelessWidget {
 }
 
 // Page pour afficher la liste des vêtements
-class ClothingListPage extends StatefulWidget {
+/*class ClothingListPage extends StatefulWidget {
   const ClothingListPage({super.key});
 
   @override
@@ -221,7 +137,7 @@ class _ClothingListPageState extends State<ClothingListPage> {
                       imageBase64 = imageBase64.split(',')[1]; // Garder seulement la partie Base64
                     }
 
-                    return ListTile(
+                    return Card(child: ListTile(
                       leading: Image.memory(
                         base64Decode(imageBase64), // Décoder l'image base64
                         width: 60,
@@ -246,7 +162,7 @@ class _ClothingListPageState extends State<ClothingListPage> {
                           ),
                         );
                       },
-                    );
+                    ));
                   },
                 );
               },
@@ -277,24 +193,6 @@ class _ClothingListPageState extends State<ClothingListPage> {
             label: 'Profil',
           ),
         ],
-        /*items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_bag),
-            label: 'Acheter',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart),
-            label: 'Panier',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profil',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: Colors.blueAccent,
-        unselectedItemColor: Colors.grey,
-        onTap: _onItemTapped,*/
       ),
     );
   }
@@ -393,31 +291,6 @@ class ClothingDetailPage extends StatelessWidget {
             Text('Marque : ${details['marque']}', style: const TextStyle(fontSize: 18)),
 
             const SizedBox(height: 30),
-
-            // Alignement des boutons "Retour" et "Ajouter au panier"
-            /*Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Espacement entre les deux boutons
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.pop(context); // Retour à la page précédente
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.grey, // Couleur du bouton "Retour"
-                  ),
-                  icon: const Icon(Icons.arrow_back), // Icône pour le bouton "Retour"
-                  label: const Text('Retour'), // Texte du bouton "Retour"
-                  //child: const Text('Retour'),
-                ),
-                ElevatedButton(
-                  onPressed: () => _addToCart(context), // Appelle la fonction pour ajouter au panier
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue, // Couleur du bouton "Ajouter au panier"
-                  ),
-                  child: const Text('Ajouter au panier'),
-                ),
-              ],
-            ),*/
             // Alignement des boutons "Retour" et "Ajouter au panier"
             Row(
               mainAxisAlignment: MainAxisAlignment
@@ -453,158 +326,4 @@ class ClothingDetailPage extends StatelessWidget {
       ),
     );
   }
-}
-
-// Page du profil utilisateur
-class UserProfilePage extends StatefulWidget {
-  const UserProfilePage({super.key});
-
-  @override
-  _UserProfilePageState createState() => _UserProfilePageState();
-}
-
-class _UserProfilePageState extends State<UserProfilePage> {
-  final _firestore = FirebaseFirestore.instance;
-
-  // Controllers pour les champs de saisie
-  final TextEditingController _loginController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _birthdayController = TextEditingController();
-  final TextEditingController _addressController = TextEditingController();
-  final TextEditingController _postalCodeController = TextEditingController();
-  final TextEditingController _cityController = TextEditingController();
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserData(); // Charger les données utilisateur lors de l'initialisation
-  }
-
-  // Fonction pour récupérer les informations utilisateur depuis Firestore
-  Future<void> _fetchUserData() async {
-    var userDoc = await _firestore.collection('users').doc('user1').get(); // Remplacer 'user1' par l'ID utilisateur connecté
-    if (userDoc.exists) {
-      var userData = userDoc.data()!;
-      _loginController.text = userData['login'] ?? '';
-      _passwordController.text = userData['password'] ?? '';
-      _birthdayController.text = userData['anniversaire'] ?? '';
-      _addressController.text = userData['adresse'] ?? '';
-      _postalCodeController.text = userData['code_postal'] ?? '';
-      _cityController.text = userData['ville'] ?? '';
-    }
-  }
-
-  // Fonction pour sauvegarder les informations modifiées
-  Future<void> _saveUserData() async {
-    await _firestore.collection('users').doc('user1').update({
-      'password': _passwordController.text,
-      'anniversaire': _birthdayController.text,
-      'adresse': _addressController.text,
-      'code_postal': _postalCodeController.text,
-      'ville': _cityController.text,
-    });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profil mis à jour avec succès')),
-    );
-  }
-
-  // Fonction pour la déconnexion
-  void _logout() {
-    Navigator.of(context).pushReplacementNamed('/login');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mon profil'),
-        actions: [
-          IconButton(
-            onPressed: _saveUserData,
-            icon: const Icon(Icons.check),
-            tooltip: 'Valider',
-          ),
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Champ Login (readonly)
-            TextField(
-              controller: _loginController,
-              decoration: const InputDecoration(labelText: 'Login'),
-              readOnly: true,
-            ),
-            const SizedBox(height: 10),
-
-            // Champ Password (offusqué)
-            TextField(
-              controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-            const SizedBox(height: 10),
-
-            // Champ Anniversaire
-            TextField(
-              controller: _birthdayController,
-              decoration: const InputDecoration(labelText: 'Anniversaire'),
-            ),
-            const SizedBox(height: 10),
-
-            // Champ Adresse
-            TextField(
-              controller: _addressController,
-              decoration: const InputDecoration(labelText: 'Adresse'),
-            ),
-            const SizedBox(height: 10),
-
-            // Champ Code Postal (clavier numérique)
-            TextField(
-              controller: _postalCodeController,
-              decoration: const InputDecoration(labelText: 'Code Postal'),
-              keyboardType: TextInputType.number,
-            ),
-            const SizedBox(height: 10),
-
-            // Champ Ville
-            TextField(
-              controller: _cityController,
-              decoration: const InputDecoration(labelText: 'Ville'),
-            ),
-            const SizedBox(height: 20),
-
-            // Bouton Se déconnecter
-            Center(
-              child: ElevatedButton(
-                onPressed: _logout,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                ),
-                // Bouton rouge et texte blanc
-                child: const Text('Se déconnecter'),
-              ),
-            ),
-          ],
-        ),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: 2, // Index pour la page "Profil"
-        onTap: (index) {
-          if (index == 0) {
-            Navigator.pushNamed(context, '/buy'); // Page Acheter
-          } else if (index == 1) {
-            Navigator.pushNamed(context, '/cart'); // Page Panier
-          }
-        },
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_bag), label: 'Acheter'),
-          BottomNavigationBarItem(icon: Icon(Icons.shopping_cart), label: 'Panier'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profil'),
-        ],
-      ),
-    );
-  }
-}
+}*/
