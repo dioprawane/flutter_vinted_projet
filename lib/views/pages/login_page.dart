@@ -2,15 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 // Si vous avez un contrôleur de gestion des utilisateurs
 import '../widgets/header.dart'; // Importer le HeaderWidget
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  LoginPageState createState() => LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> {
+class LoginPageState extends State<LoginPage> {
   final TextEditingController _loginController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -20,16 +21,19 @@ class _LoginPageState extends State<LoginPage> {
     String password = _passwordController.text.trim();
 
     // Vérifiez si les champs sont vides naviguez vers la page suivante
-    if (login.isEmpty && password.isEmpty) {
+    /*if (login.isEmpty && password.isEmpty) {
       Navigator.pushNamed(context, '/buy');
       return;
-    }
+    }*/
 
     // Vérifiez si les champs sont vides
     if (login.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Veuillez remplir tous les champs')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Veuillez remplir tous les champs')),
+        );
+      }
+      print("Erreur : Un ou plusieurs champs sont vides.");
       return;
     }
 
@@ -42,18 +46,30 @@ class _LoginPageState extends State<LoginPage> {
           .get();
 
       if (query.docs.isNotEmpty) {
-        // Si l'utilisateur existe, rediriger vers la page suivante (ici, la page des vêtements)
-        Navigator.pushNamed(context, '/buy');
+        // Si l'utilisateur existe, enregistrez les informations de session
+        var user = query.docs.first;
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userId', user.id);
+        await prefs.setString('userLogin', login);
+
+        // Rediriger vers la page principale
+        if (mounted) {
+          Navigator.pushNamed(context, '/buy');
+        }
       } else {
-        // Si l'utilisateur n'existe pas
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Utilisateur ou mot de passe incorrect')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text('Utilisateur ou mot de passe incorrect')),
+          );
+        }
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur lors de la connexion : $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur lors de la connexion : $e')),
+        );
+      }
     }
   }
 

@@ -10,10 +10,10 @@ class ClothingListPage extends StatefulWidget {
   const ClothingListPage({super.key});
 
   @override
-  _ClothingListPageState createState() => _ClothingListPageState();
+  ClothingListPageState createState() => ClothingListPageState();
 }
 
-class _ClothingListPageState extends State<ClothingListPage> {
+class ClothingListPageState extends State<ClothingListPage> {
   final ClothingController _clothingController = ClothingController(); // Initialiser le contrôleur
 
   @override

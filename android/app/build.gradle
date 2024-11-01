@@ -31,6 +31,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        missingDimensionStrategy 'flutter.minSdkVersion', 'flutter-20' // Ajoutez cette ligne si vous avez des erreurs de configuration
     }
 
     buildTypes {

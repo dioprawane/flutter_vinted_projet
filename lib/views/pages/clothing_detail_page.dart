@@ -10,18 +10,20 @@ class ClothingDetailPage extends StatefulWidget {
   const ClothingDetailPage({super.key, required this.clothingItem});
 
   @override
-  _ClothingDetailPageState createState() => _ClothingDetailPageState();
+  ClothingDetailPageState createState() => ClothingDetailPageState();
 }
 
-class _ClothingDetailPageState extends State<ClothingDetailPage> {
+class ClothingDetailPageState extends State<ClothingDetailPage> {
   final ClothingController _clothingController = ClothingController(); // Initialiser le contrôleur
 
   // Fonction pour ajouter l'article au panier
   Future<void> _addToCart() async {
     await _clothingController.addToCart('user1', widget.clothingItem); // Utiliser le contrôleur
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Vêtement ajouté au panier')),
-    );
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Vêtement ajouté au panier')),
+      );
+    }
   }
 
   @override
