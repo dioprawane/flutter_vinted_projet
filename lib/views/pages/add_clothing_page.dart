@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:convert'; // Import pour la conversion en base64
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../controllers/clothing_controller.dart'; // Importer le contrôleur ClothingController
 import '../../models/clothing.dart'; // Importer le modèle Clothing
 import 'package:permission_handler/permission_handler.dart';
+import '../widgets/header.dart'; // Importer le widget HeaderWidget
+
 class AddClothingPage extends StatefulWidget {
   @override
   AddClothingPageState createState() => AddClothingPageState();
@@ -20,69 +23,78 @@ class AddClothingPageState extends State<AddClothingPage> {
   String? _category;
   String? _imageBase64;
 
-  // Fonction pour sélectionner une image depuis la galerie
-  /*Future<void> _pickImage() async {
-    final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      _selectedImage = File(pickedFile.path);
-      _fetchCategoryAndImageBase64();
-    }
-  }*/
-  // Fonction pour sélectionner une image depuis la galerie avec gestion des permissions
-  // Fonction pour sélectionner une image depuis un dossier avec gestion des permissions
-// Fonction pour sélectionner une image depuis un dossier avec gestion des permissions
+  // Fonction pour convertir l'image en base64
+  Future<void> _convertImageToBase64(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    setState(() {
+      _imageBase64 = base64Encode(bytes);
+    });
+  }
+
+  // Fonction pour sélectionner une image et la convertir en base64
   Future<void> _pickImage() async {
-    // Demander explicitement la permission de stockage
-    var status = await Permission.storage.status;
-    if (!status.isGranted) {
-      status = await Permission.storage.request();
-    }
+    if (Platform.isAndroid) {
+      if (await Permission.storage.request().isGranted ||
+          (await Permission.manageExternalStorage.status.isGranted)) {
+        FilePickerResult? result = await FilePicker.platform.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'jpeg', 'png'],
+        );
 
-    if (status.isGranted) {
-      // Ouvrir le file picker pour sélectionner un fichier image
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['jpg', 'jpeg', 'png'], // Extensions de fichiers autorisées
-      );
+        if (result != null && result.files.single.path != null) {
+          setState(() {
+            _selectedImage = File(result.files.single.path!);
+          });
 
-      if (result != null && result.files.single.path != null) {
-        setState(() {
-          _selectedImage = File(result.files.single.path!);
-        });
-        // Appeler la fonction pour obtenir la catégorie et l'image en base64
-        _fetchCategoryAndImageBase64();
+          // Convertir l'image en base64 localement
+          await _convertImageToBase64(_selectedImage!);
+
+          // Lancer la prédiction automatiquement après la sélection de l'image
+          await _fetchCategory();
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Permission refusée pour accéder aux fichiers."),
+            ),
+          );
+        }
       }
-    } else {
+    }
+  }
+
+  // Fonction pour obtenir uniquement la catégorie depuis l'API
+  Future<void> _fetchCategory() async {
+    if (_selectedImage == null) return;
+    try {
+      final result = await _clothingController.getCategoryAndImageBase64(_selectedImage!);
       if (mounted) {
-        // Vérifiez si le widget est toujours monté
-        // Affichez un message à l'utilisateur si la permission est refusée
+        setState(() {
+          _category = result["predicted_class"];
+        });
+      }
+    } catch (e) {
+      print("Erreur : $e");
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Permission refusée pour accéder aux fichiers.")),
+          SnackBar(content: Text("Erreur lors de l'envoi de l'image à l'API : $e")),
         );
       }
     }
   }
 
-  // Fonction pour obtenir la catégorie et l'image en base64 depuis l'API
-  Future<void> _fetchCategoryAndImageBase64() async {
-    if (_selectedImage == null) return;
-    try {
-      final result = await _clothingController.getCategoryAndImageBase64(_selectedImage!);
-      setState(() {
-        _category = result["predicted_class"];
-        _imageBase64 = result["image_base64"];
-      });
-    } catch (e) {
-      print("Erreur : $e");
-    }
-  }
-
   // Fonction pour valider et ajouter un nouveau vêtement
   Future<void> _submitForm() async {
-    if (_titleController.text.isEmpty || _sizeController.text.isEmpty || _priceController.text.isEmpty || _selectedImage == null || _category == null) {
+    if (_titleController.text.isEmpty ||
+        _sizeController.text.isEmpty ||
+        _priceController.text.isEmpty ||
+        _selectedImage == null ||
+        _category == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Veuillez remplir tous les champs et ajouter une image")),
+        SnackBar(
+            content:
+                Text("Veuillez remplir tous les champs et ajouter une image")),
       );
       return;
     }
@@ -92,23 +104,21 @@ class AddClothingPageState extends State<AddClothingPage> {
       titre: _titleController.text,
       taille: _sizeController.text,
       prix: double.parse(_priceController.text),
-      image: _imageBase64 ?? '',
-      detailsCategorie: _category,
-      detailsImage: _imageBase64,
+      image: _imageBase64 ?? '', // Utiliser le base64 généré localement
+      detailsCategorie: _category, // Prédit par l'API
+      detailsImage: null, // Laisser à null par défaut
       detailsMarque: _brandController.text,
+      detailsPrix: double.parse(_priceController.text), // Laisser à null par défaut
+      detailsTaille: null, // Laisser à null par défaut
+      detailsTitre: null, // Laisser à null par défaut
     );
 
     await _clothingController.addNewClothing(newClothing);
 
     if (mounted) {
-      // Vérifiez si le widget est toujours monté
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Vêtement ajouté avec succès")),
       );
-    }
-
-    if (mounted) {
-      // Vérifiez si le widget est toujours monté
       Navigator.pop(context);
     }
   }
@@ -116,9 +126,7 @@ class AddClothingPageState extends State<AddClothingPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Ajouter un vêtement"),
-      ),
+      appBar: const HeaderWidget(title: "Ajouter un vêtement"),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(

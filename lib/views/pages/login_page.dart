@@ -20,7 +20,7 @@ class LoginPageState extends State<LoginPage> {
     String login = _loginController.text.trim();
     String password = _passwordController.text.trim();
 
-    // Vérifiez si les champs sont vides naviguez vers la page suivante
+    // Vérifiez si les champs sont vides naviguez vers la page suivante pour tester facilement
     /*if (login.isEmpty && password.isEmpty) {
       Navigator.pushNamed(context, '/buy');
       return;
@@ -76,16 +76,6 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      /*appBar: AppBar(
-        title: Center(
-          child: Text(
-            'Connexion',
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                  color: Colors.white,
-                ),
-          ),
-        ),
-      ),*/
       appBar: const HeaderWidget(title: 'DIOP VINTED'), // Utiliser le widget Header
       body: Padding(
         padding: const EdgeInsets.all(16.0),

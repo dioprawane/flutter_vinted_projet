@@ -116,4 +116,5 @@ class ClothingListPageState extends State<ClothingListPage> {
       bottomNavigationBar: const MenuWidget(currentIndex: 0),
     );
   }
+  
 }

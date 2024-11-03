@@ -3,6 +3,7 @@ import 'dart:convert'; // Pour base64Decode
 import '../../controllers/clothing_controller.dart'; // Importer le contrôleur ClothingController
 import '../../models/clothing.dart'; // Importer le modèle Clothing
 import '../widgets/header.dart'; // Importer le header
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ClothingDetailPage extends StatefulWidget {
   final Clothing clothingItem;
@@ -18,11 +19,22 @@ class ClothingDetailPageState extends State<ClothingDetailPage> {
 
   // Fonction pour ajouter l'article au panier
   Future<void> _addToCart() async {
-    await _clothingController.addToCart('user1', widget.clothingItem); // Utiliser le contrôleur
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Vêtement ajouté au panier')),
-      );
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? userId = prefs.getString('userId');
+
+    if (userId != null) {
+      await _clothingController.addToCart(userId, widget.clothingItem);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vêtement ajouté au panier')),
+        );
+      }
+    } else {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Utilisateur non connecté')),
+        );
+      }
     }
   }
 

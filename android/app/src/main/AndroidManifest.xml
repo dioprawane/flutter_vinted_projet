@@ -1,9 +1,11 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.example.vinted_projet">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" 
+        xmlns:tools="http://schemas.android.com/tools" 
+        package="com.example.vinted_projet">
 
     <!-- Permissions pour accéder au stockage et à la caméra -->
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
-    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" tools:ignore="ScopedStorage"/>
 
 
     <application

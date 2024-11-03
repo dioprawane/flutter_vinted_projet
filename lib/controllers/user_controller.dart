@@ -48,4 +48,5 @@ class UserController {
       print('Erreur lors de la création de l\'utilisateur : $e');
     }
   }
+  
 }

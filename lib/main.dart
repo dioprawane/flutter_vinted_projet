@@ -76,36 +76,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-  /*@override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'DIOP VINTED',
-      theme: ThemeData(
-        useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blueAccent,
-          brightness: Brightness.light,
-        ),
-        textTheme: TextTheme(
-          titleLarge: GoogleFonts.oswald(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            color: const Color.fromARGB(255, 191, 182, 182),
-          ),
-          bodyMedium: GoogleFonts.merriweather(),
-        ),
-      ),
-      home: const LoginPage(),
-      routes: {
-        '/login': (context) => LoginPage(),
-        '/profile': (context) => ProfileView(userId: 'user1'),
-        '/buy': (context) => const ClothingListPage(),
-        '/cart': (context) => PanierPage(userId: 'user1'),
-      },
-    );
-  }
-}*/
-
 // Page d'accueil après connexion pour tester la navigation
 class HomePage extends StatelessWidget {
   @override
