@@ -1,5 +1,15 @@
 # DIOP Serigne Rawane - Développement Mobile – Application de VINTED
 
+## Sommaire
+- [Objectif](#objectif)
+- [Présentation du projet](#présentation-du-projet)
+  - [Fonctionnalités incluses](#fonctionnalités-incluses)
+  - [Lancer l'application](#lancer-lapplication)
+- [Connexion](#connexion)
+- [Utiles](#utiles)
+- [Ressources pour commencer](#ressources-pour-commencer)
+- [Références](#références)
+
 ## Objectif
 L’objectif de ce projet est de développer une application légère de VINTED qui permet d’acheter des vêtements.
 
@@ -39,14 +49,21 @@ Pour exécuter l'application localement, suivez les étapes ci-dessous :
    ```
 
 ## Connexion
-Pour la démonstration :
-- **Email** : dioprawane16@gmail.com || dioprawane2716@gmail.com
-- **Mot de passe** : Vinted2024 || Vinted20242
+Pour la démonstration, connectez-vous avec ces comptes :
+- **Email** : dioprawane16@gmail.com
+- **Mot de passe** : Vinted2024
+
+ou bien
+- **Email** : dioprawane2716@gmail.com
+- **Mot de passe** : Vinted20242
 
 ## Utiles 
-Pour plus d'informations concernant le modèle CNN d'IA qui prédit la catégorie des vêtements, ainsi que les données de test (les images que vous pouvez utiliser pour tester le modèle se trouvent vers ce lien : **lien**) et d'autres détails liés au modèle, consultez le dépôt suivant :
+Pour plus d'informations concernant le modèle CNN d'IA qui prédit la catégorie des vêtements, ainsi que les données de test (les images que vous pouvez utiliser pour tester le modèle se trouvent vers ce lien : **https://github.com/dioprawane/model_cnn_predit_clothing/tree/data/validation** avec les images de chacune des 3 catégories) et d'autres détails liés au modèle, consultez le dépôt suivant :
 
 - [Modèle CNN pour la prédiction de la catégorie de vêtements](https://github.com/dioprawane/model_cnn_predit_clothing.git)
+
+API configurée et déployée sur Heroku et accessible à l'adresse suivante :
+- [https://cnn-api-clothing-4d8c986cc770.herokuapp.com/](https://cnn-api-clothing-4d8c986cc770.herokuapp.com/)
 
 
 ## Ressources pour commencer
@@ -56,3 +73,9 @@ Si c’est votre premier projet Flutter, voici quelques ressources utiles pour d
 - [Cookbook : Exemples Flutter utiles](https://docs.flutter.dev/cookbook)
 
 Pour obtenir de l’aide sur le développement Flutter, consultez la [documentation en ligne](https://docs.flutter.dev/) qui offre des tutoriels, des exemples, des conseils sur le développement mobile et une référence complète de l’API.
+
+## Références
+
+**DIOP Serigne Rawane**, étudiant en `Master MIAGE parcours IA2 (Intelligence Artificielle Appliquée)`
+
+**Mathieu Miollan**, `Chef de projets et développeur Web chez Sopra Stéria et enseignant à l'Unica`
